@@ -1,8 +1,6 @@
 ## build sshd docker images
 `docker build -f dockerfile_sshd -t sshd .`  
-
-## install python dependencies
-`pip install -r requirements.txt`
+** 추후에 문제 이미지 파일 업로드 로직을 따로 개발할 예정  
 
 ## start api server
-`python main.py`  
+`go run main.go`  
