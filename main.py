@@ -29,7 +29,7 @@ def remove_sandbox(sandbox_id):
 
 @app.route('/')
 def home():
-    return jsonify({"massage": 'This api is the api that creates the sandbox of hansei wargame.'})
+    return jsonify({"massage": 'Server Generation API for CTF'})
 
 
 @app.route('/create', methods=['GET'])
@@ -42,7 +42,7 @@ def create():
         "sshd", detach=True, ports={22: sandbox_port}).id[:12]
     return_msg = {"massage": 'The sandbox is created.', "sandbox_port": sandbox_port,
                   "user_name": user_name, "sandbox_id": sandbox_id, "user_password": user_password}
-    used_sandbox.append(return_msg)
+    used_sandbox.append(return_msg)     # 이미 생성된 포트 및 프로그램 종료시 종료 작업 수행을 위해
 
     # 나중에 유저 토큰 추가
     return jsonify(return_msg)
