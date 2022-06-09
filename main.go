@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+
+	"github.com/docker/docker/client"
 	"github.com/gin-gonic/gin"
 )
 
@@ -10,6 +13,11 @@ var online_sandbox_ids []string
 func main() {
 
 	router := gin.Default()
+
+	_, err := client.NewClientWithOpts()
+	if err != nil {
+		fmt.Println("Docker Client Error: ", err)
+	}
 
 	router.GET("/", home)
 	router.GET("/create", create)
