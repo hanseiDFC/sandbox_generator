@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   sandbox-generator:
-    image: minpeter/sandbox-generator:latest
+    image: minpeter/sandbox_generator:latest
     container_name: sandbox-generator
     restart: unless-stopped
     volumes:

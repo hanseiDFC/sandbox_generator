@@ -14,4 +14,4 @@ COPY --from=builder /app/server /app
 
 EXPOSE 5000
 
-CMD ["/app/server"]
+CMD /app

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/docker/docker/client"
 	"github.com/gin-gonic/gin"
@@ -23,5 +24,12 @@ func main() {
 	router.GET("/create", create)
 	router.POST("/remove", remove)
 
-	router.Run(":5000")
+	// 환경변수에 SAN_PORT가 있으면 이용 없으면 5000
+
+	env := os.Getenv("SAN_PORT")
+	if env == "" {
+		env = "5000"
+	}
+
+	router.Run(":" + env)
 }
