@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"strconv"
 	"time"
@@ -14,6 +15,20 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/gin-gonic/gin"
 )
+
+func random_port() string {
+	rand.Seed(time.Now().UnixNano())
+
+	port := rand.Intn(65535-1024) + 1024
+
+	for _, rpn := range used_ports { // Random Port Number
+		if port == rpn {
+			return random_port()
+		}
+	}
+	used_ports = append(used_ports, port)
+	return strconv.Itoa(port)
+}
 
 type challenge struct {
 	Image string

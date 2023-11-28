@@ -1,8 +1,8 @@
 version: "3.8"
 services:
-  sandbox-generator:
-    image: minpeter/sandbox_generator:latest
-    container_name: sandbox-generator
+  dklodd:
+    image: minpeter/dklodd:latest
+    container_name: dklodd-test
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -10,7 +10,7 @@ services:
       - traefik.enable=true
       - traefik.http.routers.sandbox-generator.entrypoints=websecure
       - traefik.http.routers.sandbox-generator.tls.certresolver=myresolver
-      - traefik.http.routers.sandbox-generator.rule=Host(`api.ctf.minpeter.tech`)
+      - traefik.http.routers.sandbox-generator.rule=Host(`dklodd.minpeter.tech`)
     networks:
       - traefik
 networks:

@@ -26,4 +26,4 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/sandbox_generator:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/dklodd:latest

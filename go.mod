@@ -1,4 +1,4 @@
-module github.com/minpeter/sandbox_generator
+module github.com/minpeter/dklodd
 
 go 1.18
 
