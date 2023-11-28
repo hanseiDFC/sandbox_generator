@@ -154,6 +154,7 @@ func create(c *gin.Context) {
 			"traefik.enable":                        "true",
 			"traefik.tcp.routers." + port + ".rule": "HostSNI(`" + port + ".ctf.minpeter.tech`)",
 			"traefik.tcp.routers." + port + ".tls":  "true",
+			"dkolld.enable":                         "true",
 		},
 	}
 
