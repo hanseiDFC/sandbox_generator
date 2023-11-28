@@ -4,17 +4,37 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
-	"github.com/docker/go-connections/nat"
 	"github.com/gin-gonic/gin"
 )
 
+type challenge struct {
+	image string
+	port  string
+	id    int
+}
+
+var challenges = []challenge{
+	{"minpeter/mathematician-in-wonderland", "5555", 1},
+}
+
+func get_image(id string) string {
+	for _, challenge := range challenges {
+		if id == strconv.Itoa(challenge.id) {
+			return challenge.image
+		}
+	}
+	return "not found"
+}
+
 func home(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Server Generation API for CTF 🚩🚩",
+		"message":    "Server Generation API for CTF 🚩🚩",
+		"challenges": challenges,
 	})
 }
 
@@ -25,25 +45,25 @@ func create(c *gin.Context) {
 		panic(err)
 	}
 
+	challenge_id := c.PostForm("id")
+
 	ctx := context.Background()
 
-	sandbox_port := random_port()
-	user_name := "root"
-	user_password := "root"
+	port := random_port()
 
 	config := &container.Config{
-		Image: "sshd",
+		// TODO: add error handling
+		Image: get_image(challenge_id),
+		Labels: map[string]string{
+			"traefik.enable":                                     "true",
+			"traefik.http.routers." + port + ".rule":             "Host(`" + port + ".ctf.minpeter.tech`)",
+			"traefik.http.routers." + port + ".entrypoints":      "websecure",
+			"traefik.http.routers." + port + ".tls.certresolver": "myresolver",
+		},
 	}
 
 	hostConfig := &container.HostConfig{
-		PortBindings: nat.PortMap{
-			"22/tcp": []nat.PortBinding{
-				{
-					HostIP:   "0.0.0.0",
-					HostPort: sandbox_port,
-				},
-			},
-		},
+		NetworkMode: "traefik",
 	}
 
 	resp, err := cli.ContainerCreate(ctx, config, hostConfig, nil, nil, "")
@@ -62,11 +82,10 @@ func create(c *gin.Context) {
 	online_sandbox_ids = append(online_sandbox_ids, sandbox_id)
 
 	return_msg := map[string]string{
-		"massage":  "success",
-		"port":     sandbox_port,
-		"user":     user_name,
-		"password": user_password,
-		"id":       sandbox_id,
+		"massage": "success",
+		// TODO: add load env from config file
+		"url": "https://" + sandbox_id + ".ctf.minpeter.tech",
+		"id":  sandbox_id,
 	}
 
 	c.JSON(http.StatusOK, return_msg)
