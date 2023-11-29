@@ -14,6 +14,7 @@ FROM alpine
 
 COPY --from=builder /app/server /app
 COPY --from=builder /app/challenges.json /challenges.json
+COPY --from=builder /app/templates /templates
 
 EXPOSE 5000
 
