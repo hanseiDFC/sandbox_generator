@@ -103,12 +103,13 @@ func home(c *gin.Context) {
 
 	chall, _ := load_challenges()
 
-	fmt.Println(c.Request.Host)
+	host := c.Request.Host
 
 	c.JSON(http.StatusOK, gin.H{
 		"message":    "Server Generation API for CTF 🚩🚩",
 		"challenges": chall,
-		"Host":       c.Request.Host,
+		"Host":       host,
+		"schema":     c.Request.URL.Scheme,
 	})
 }
 
@@ -122,7 +123,16 @@ func create(c *gin.Context) {
 	}
 
 	challenge_id := c.Param("id")
+
 	host := strings.Split(c.Request.Host, ":")
+
+	if len(host) == 1 {
+		if c.Request.URL.Scheme == "https" {
+			host = append(host, "443")
+		} else {
+			host = append(host, "80")
+		}
+	}
 
 	// get hostname from url
 
