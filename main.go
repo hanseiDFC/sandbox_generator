@@ -103,6 +103,8 @@ func home(c *gin.Context) {
 
 	chall, _ := load_challenges()
 
+	fmt.Println(c.Request.Host)
+
 	c.JSON(http.StatusOK, gin.H{
 		"message":    "Server Generation API for CTF 🚩🚩",
 		"challenges": chall,
@@ -117,8 +119,6 @@ func create(c *gin.Context) {
 		})
 		return
 	}
-
-	host := strings.Split(c.Request.Host, ":")
 
 	challenge_id := c.Param("id")
 
