@@ -27,14 +27,32 @@ func main() {
 
 	router := gin.Default()
 
+	router.LoadHTMLGlob("templates/*")
+
 	_, err := client.NewClientWithOpts()
 	if err != nil {
 		fmt.Println("Docker Client Error: ", err)
 	}
 
-	router.GET("/", home)
-	router.GET("/new/:id", create)
-	router.GET("/del/:id", remove)
+	router.GET("/", func(c *gin.Context) {
+
+		chall, _ := load_challenges()
+		c.HTML(http.StatusOK, "index.tmpl", gin.H{
+			"challenges": chall,
+		})
+	})
+
+	router.GET("/:id", func(c *gin.Context) {
+
+		id := c.Param("id")
+
+		chall := get_chall(id)
+
+		c.HTML(http.StatusOK, "challenge.tmpl", chall)
+	})
+
+	router.GET("/:id/new", create)
+	router.GET("/:id/del", remove)
 
 	// 환경변수에 SAN_PORT가 있으면 이용 없으면 5000
 
@@ -89,14 +107,14 @@ func load_challenges() ([]challenge, error) {
 	return challenges, nil
 }
 
-func get_image(id string) string {
+func get_chall(id string) challenge {
 
 	chall, err := load_challenges()
 	if err != nil {
 		panic(err)
 	}
 	number_id, _ := strconv.Atoi(id)
-	return chall[number_id].Image
+	return chall[number_id]
 }
 
 func home(c *gin.Context) {
@@ -156,7 +174,8 @@ func create(c *gin.Context) {
 
 	ctx := context.Background()
 
-	imageName := get_image(challenge_id)
+	chall := get_chall(challenge_id)
+	imageName := chall.Image
 
 	fmt.Println("create sandbox: " + imageName)
 
@@ -198,7 +217,7 @@ func create(c *gin.Context) {
 
 	config := &container.Config{
 		// TODO: add error handling
-		Image: get_image(challenge_id),
+		Image: imageName,
 		Labels: map[string]string{
 			"traefik.enable":                        "true",
 			"traefik.tcp.routers." + port + ".rule": "HostSNI(`" + port + "." + host[0] + "`)",
@@ -235,6 +254,7 @@ func create(c *gin.Context) {
 
 	c.JSON(http.StatusOK,
 		gin.H{
+			"name": chall.Name,
 			"url":  port + "." + host[0],
 			"port": host[1],
 			"id":   sandboxID[0:12],

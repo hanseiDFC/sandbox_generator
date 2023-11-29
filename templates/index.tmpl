@@ -1,0 +1,15 @@
+<html>
+<h1>
+  dklodd
+</h1>
+
+
+{{range $indxe, $chall := .challenges}}
+<div>
+  <h2>{{$chall.Name}}</h2>
+  <p>image: {{$chall.Image}}</p>
+  <button type="button" class="btn btn-primary" onclick="window.location.href='/{{$chall.Id}}'">Go to challenge</button>
+</div>
+{{end}}
+
+</html>
