@@ -1,0 +1,5 @@
+<h2>how to connect to the challenge?</h2>
+<p>{{.Connection.ncat}}</p>
+<p>{{.Connection.openssl}}</p>
+
+<button hx-get="/{{.Id}}/del" hx-swap="outerHTML">delete instance</button>

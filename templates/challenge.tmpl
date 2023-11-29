@@ -6,8 +6,6 @@
   {{ .Name }}
 </h1>
 
-{{ .Image }}
-
-<button hx-get="/{{.Id}}/new">create instance</button>
+<button hx-get="/{{.Id}}/new" hx-swap="outerHTML">create instance</button>
 
 </html>

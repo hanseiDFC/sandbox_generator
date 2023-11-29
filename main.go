@@ -252,18 +252,13 @@ func create(c *gin.Context) {
 
 	online_sandbox_ids = append(online_sandbox_ids, sandboxID[0:12])
 
-	c.JSON(http.StatusOK,
-		gin.H{
-			"name": chall.Name,
-			"url":  port + "." + host[0],
-			"port": host[1],
-			"id":   sandboxID[0:12],
-			"connection": gin.H{
-				"ncat":    "ncat --ssl " + port + "." + host[0] + " " + host[1],
-				"openssl": "openssl s_client -connect " + port + "." + host[0] + ":" + host[1],
-			},
+	c.HTML(http.StatusOK, "create.tmpl", gin.H{
+		"Connection": gin.H{
+			"ncat":    "ncat --ssl " + port + "." + host[0] + " " + host[1],
+			"openssl": "openssl s_client -connect " + port + "." + host[0] + ":" + host[1],
 		},
-	)
+		".Id": sandboxID[0:12],
+	})
 }
 
 func remove(c *gin.Context) {
@@ -276,10 +271,7 @@ func remove(c *gin.Context) {
 	ctx := context.Background()
 
 	sandbox_id := c.Param("id")
-
-	return_msg := map[string]string{
-		"received": sandbox_id,
-	}
+	var message string
 
 	for _, online_sandbox_id := range online_sandbox_ids {
 		if online_sandbox_id == sandbox_id {
@@ -298,14 +290,17 @@ func remove(c *gin.Context) {
 
 			fmt.Println("remove sandbox: " + sandbox_id)
 
-			return_msg["massage"] = "remove sandbox: " + sandbox_id
+			message = "remove sandbox: " + sandbox_id
 
 			break
 
 		} else {
-			return_msg["massage"] = "can't find sandbox"
+			message = "can't find sandbox"
 		}
 	}
 
-	c.JSON(http.StatusOK, return_msg)
+	c.HTML(http.StatusOK, "remove.tmpl", gin.H{
+		"Message": message,
+		"Id":      sandbox_id,
+	})
 }
