@@ -15,3 +15,9 @@ We would like to clarify that this is an independent project and has no connecti
 아직 실험적인 단계이므로, 사용에 주의가 필요합니다.
 
 [minpeter/homelab_infra](https://github.com/minpeter/homelab_infra) 설정을 따른 후, docker-compose up -d 명령어를 통해 실행합니다.
+
+### shutdown all containers
+
+```bash
+docker rm -f $(docker ps --filter "label=dklodd=true" -qa)
+```

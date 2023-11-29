@@ -1,14 +1,17 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/docker/docker/api/types"
@@ -30,8 +33,8 @@ func main() {
 	}
 
 	router.GET("/", home)
-	router.GET("/create", create)
-	router.POST("/remove", remove)
+	router.GET("/new", create)
+	router.POST("/del", remove)
 
 	// 환경변수에 SAN_PORT가 있으면 이용 없으면 5000
 
@@ -133,7 +136,6 @@ func create(c *gin.Context) {
 
 	port := random_port()
 
-	// 이미지가 없다면 pull
 	_, _, err = cli.ImageInspectWithRaw(ctx, imageName)
 	if err != nil {
 		fmt.Println("pull image: " + imageName)
@@ -144,7 +146,28 @@ func create(c *gin.Context) {
 			})
 			return
 		}
-		defer out.Close()
+
+		// Wait for the image pull to complete
+		var buf bytes.Buffer
+		_, copyErr := io.Copy(&buf, out)
+		if copyErr != nil {
+			// Handle the copy error
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": "docker client error - fail to read image pull output",
+			})
+			return
+		}
+
+		// Check if there are any errors reported in the output
+		if strings.Contains(buf.String(), "error") {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": "docker client error - error in image pull output",
+			})
+			return
+		}
+
+		// Now the image pull is complete
+		fmt.Println("Image pull complete for: " + imageName)
 	}
 
 	config := &container.Config{
@@ -154,7 +177,7 @@ func create(c *gin.Context) {
 			"traefik.enable":                        "true",
 			"traefik.tcp.routers." + port + ".rule": "HostSNI(`" + port + ".ctf.minpeter.tech`)",
 			"traefik.tcp.routers." + port + ".tls":  "true",
-			"dkolld.enable":                         "true",
+			"dklodd":                                "true",
 		},
 	}
 
@@ -171,9 +194,6 @@ func create(c *gin.Context) {
 	}
 
 	sandboxID := resp.ID
-
-	// Add a short delay before starting the container
-	time.Sleep(1 * time.Second)
 
 	// Start the container
 	if err := cli.ContainerStart(ctx, sandboxID, types.ContainerStartOptions{}); err != nil {
