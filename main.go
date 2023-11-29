@@ -175,7 +175,7 @@ func create(c *gin.Context) {
 		Image: get_image(challenge_id),
 		Labels: map[string]string{
 			"traefik.enable":                        "true",
-			"traefik.tcp.routers." + port + ".rule": "HostSNI(`" + port + ".ctf.minpeter.tech`)",
+			"traefik.tcp.routers." + port + ".rule": "HostSNI(`" + port + ".ctf.minpeter.tech`, `" + port + ".ctf.traefik.me`)",
 			"traefik.tcp.routers." + port + ".tls":  "true",
 			"dklodd":                                "true",
 		},
@@ -208,10 +208,11 @@ func create(c *gin.Context) {
 	online_sandbox_ids = append(online_sandbox_ids, sandboxID[0:12])
 
 	return_msg := map[string]string{
-		"massage": "plz wait 10 seconds and connect to command \"openssl s_client -connect " + port + ".ctf.minpeter.tech:443\"",
-		"url":     port + ".ctf.minpeter.tech",
-		"port":    "443",
-		"id":      sandboxID[0:12],
+		"massage":    "plz wait 10 seconds and connect to command \"openssl s_client -connect " + port + ".ctf.minpeter.tech:443\"",
+		"url":        port + ".ctf.minpeter.tech",
+		"local-test": "openssl s_client -connect " + port + ".ctf.traefik.me:8080",
+		"port":       "443",
+		"id":         sandboxID[0:12],
 	}
 
 	c.JSON(http.StatusOK, return_msg)

@@ -14,10 +14,22 @@ We would like to clarify that this is an independent project and has no connecti
 
 아직 실험적인 단계이므로, 사용에 주의가 필요합니다.
 
-[minpeter/homelab_infra](https://github.com/minpeter/homelab_infra) 설정을 따른 후, docker-compose up -d 명령어를 통해 실행합니다.
+```bash
+docker network create traefik
+
+docker compose -f local-compose.yml up -d
+```
+
+이제 <http://traefik.me:8080>에 접속하면 traefik 대시보드를 확인할 수 있습니다.
+
+실제로 서비스를 이용하기 위해선 <dklodd.traefik.me:8080>에 접속하여 사용할 수 있습니다.
+
+---
+
+실제 서비스를 위해선 sidecar-compose.yml과 [minpeter/homelab_infra](https://github.com/minpeter/homelab_infra)의 traefik을 이용하여 외부에서 접속할 수 있도록 설정해야 합니다.
 
 ### shutdown all containers
 
 ```bash
-docker rm -f $(docker ps --filter "label=dklodd=true" -qa)
+docker rm -f $(docker ps -qaf "label=dklodd=true")
 ```
