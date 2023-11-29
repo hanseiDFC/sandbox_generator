@@ -105,14 +105,10 @@ func home(c *gin.Context) {
 
 	host := c.Request.Host
 
-	// Referer 가져오기
-	fmt.Println(c.Request.Header.Get("Referer"))
-
 	c.JSON(http.StatusOK, gin.H{
 		"message":    "Server Generation API for CTF 🚩🚩",
 		"challenges": chall,
 		"Host":       host,
-		"schema":     c.Request.Referer(),
 	})
 }
 
@@ -128,6 +124,16 @@ func create(c *gin.Context) {
 	challenge_id := c.Param("id")
 
 	host := strings.Split(c.Request.Host, ":")
+
+	if len(host) == 1 {
+		if c.Request.TLS != nil {
+			// HTTPS인 경우 443번 포트로 설정
+			host = append(host, "443")
+		} else {
+			// HTTP인 경우 80번 포트로 설정
+			host = append(host, "80")
+		}
+	}
 
 	referer := c.Request.Referer()
 
