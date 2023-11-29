@@ -33,8 +33,8 @@ func main() {
 	}
 
 	router.GET("/", home)
-	router.GET("/new", create)
-	router.DELETE("/del", remove)
+	router.GET("/new/:id", create)
+	router.GET("/del/:id", remove)
 
 	// 환경변수에 SAN_PORT가 있으면 이용 없으면 5000
 
@@ -118,8 +118,11 @@ func create(c *gin.Context) {
 		return
 	}
 
-	// url ?id=0에서 chall_id를 가져옴
-	challenge_id := c.Query("id")
+	host := strings.Split(c.Request.Host, ":")
+
+	challenge_id := c.Param("id")
+
+	// get hostname from url
 
 	if challenge_id == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -175,7 +178,7 @@ func create(c *gin.Context) {
 		Image: get_image(challenge_id),
 		Labels: map[string]string{
 			"traefik.enable":                        "true",
-			"traefik.tcp.routers." + port + ".rule": "HostSNI(`" + port + ".ctf.minpeter.tech`, `" + port + ".ctf.traefik.me`)",
+			"traefik.tcp.routers." + port + ".rule": "HostSNI(`" + port + "." + host[0] + "`)",
 			"traefik.tcp.routers." + port + ".tls":  "true",
 			"dklodd":                                "true",
 		},
@@ -207,15 +210,17 @@ func create(c *gin.Context) {
 
 	online_sandbox_ids = append(online_sandbox_ids, sandboxID[0:12])
 
-	return_msg := map[string]string{
-		"massage":    "plz wait 10 seconds and connect to command \"openssl s_client -connect " + port + ".ctf.minpeter.tech:443\"",
-		"url":        port + ".ctf.minpeter.tech",
-		"local-test": "openssl s_client -connect " + port + ".ctf.traefik.me:8080",
-		"port":       "443",
-		"id":         sandboxID[0:12],
-	}
-
-	c.JSON(http.StatusOK, return_msg)
+	c.JSON(http.StatusOK,
+		gin.H{
+			"url":  port + "." + host[0],
+			"port": host[1],
+			"id":   sandboxID[0:12],
+			"connection": gin.H{
+				"ncat":    "ncat --ssl " + port + "." + host[0] + " " + host[1],
+				"openssl": "openssl s_client -connect " + port + "." + host[0] + ":" + host[1],
+			},
+		},
+	)
 }
 
 func remove(c *gin.Context) {
@@ -227,7 +232,7 @@ func remove(c *gin.Context) {
 
 	ctx := context.Background()
 
-	sandbox_id := c.PostForm("id")
+	sandbox_id := c.Param("id")
 
 	return_msg := map[string]string{
 		"received": sandbox_id,
