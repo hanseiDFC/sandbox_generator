@@ -203,9 +203,9 @@ func create(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("create sandbox: " + sandboxID)
+	fmt.Println("create sandbox: " + sandboxID[0:12])
 
-	online_sandbox_ids = append(online_sandbox_ids, sandboxID)
+	online_sandbox_ids = append(online_sandbox_ids, sandboxID[0:12])
 
 	return_msg := map[string]string{
 		"massage": "plz wait 10 seconds and connect to command \"openssl s_client -connect " + port + ".ctf.minpeter.tech:443\"",
