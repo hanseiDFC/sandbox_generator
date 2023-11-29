@@ -13,6 +13,6 @@
   },
   {
     "name": "socat",
-    "image": "minpeter/socat_test"
+    "image": "minpeter/socat-test"
   }
 ]
