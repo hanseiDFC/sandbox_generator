@@ -15,12 +15,10 @@ We would like to clarify that this is an independent project and has no connecti
 아직 실험적인 단계이므로, 사용에 주의가 필요합니다.
 
 ```bash
-docker network create traefik
-
 docker compose -f local-compose.yml up -d
 ```
 
-이제 <http://traefik.me:8080>에 접속하면 traefik 대시보드를 확인할 수 있습니다.
+이제 <http://traefik.traefik.me:8080>에 접속하면 traefik 대시보드를 확인할 수 있습니다.
 
 실제로 서비스를 이용하기 위해선 <dklodd.traefik.me:8080>에 접속하여 사용할 수 있습니다.
 

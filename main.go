@@ -34,7 +34,7 @@ func main() {
 
 	router.GET("/", home)
 	router.GET("/new", create)
-	router.POST("/del", remove)
+	router.DELETE("/del", remove)
 
 	// 환경변수에 SAN_PORT가 있으면 이용 없으면 5000
 
