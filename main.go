@@ -3,11 +3,11 @@ package main
 import (
 	"bytes"
 	"context"
+	"crypto/sha1"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
-	"math/rand"
 	"net/http"
 	"os"
 	"strconv"
@@ -20,7 +20,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var used_ports []int
 var online_sandbox_ids []string
 
 func main() {
@@ -54,8 +53,6 @@ func main() {
 	router.GET("/:id/new", create)
 	router.GET("/:id/del", remove)
 
-	// 환경변수에 SAN_PORT가 있으면 이용 없으면 5000
-
 	env := os.Getenv("SAN_PORT")
 	if env == "" {
 		env = "5000"
@@ -64,18 +61,9 @@ func main() {
 	router.Run(":" + env)
 }
 
-func random_port() string {
-	rand.Seed(time.Now().UnixNano())
-
-	port := rand.Intn(65535-1024) + 1024
-
-	for _, rpn := range used_ports { // Random Port Number
-		if port == rpn {
-			return random_port()
-		}
-	}
-	used_ports = append(used_ports, port)
-	return strconv.Itoa(port)
+func GenerateId(data *gin.Context) string {
+	hash := sha1.Sum([]byte(data.ClientIP() + data.Request.UserAgent() + time.Now().String()))
+	return strings.ToLower(base64.RawURLEncoding.EncodeToString(hash[:])[:5])
 }
 
 type challenge struct {
@@ -85,8 +73,7 @@ type challenge struct {
 }
 
 func load_challenges() ([]challenge, error) {
-	// Read the content of the JSON file
-	fileContent, err := ioutil.ReadFile("challenges.json")
+	fileContent, err := os.ReadFile("challenges.json")
 	if err != nil {
 		return nil, err
 	}
@@ -108,26 +95,12 @@ func load_challenges() ([]challenge, error) {
 }
 
 func get_chall(id string) challenge {
-
 	chall, err := load_challenges()
 	if err != nil {
 		panic(err)
 	}
 	number_id, _ := strconv.Atoi(id)
 	return chall[number_id]
-}
-
-func home(c *gin.Context) {
-
-	chall, _ := load_challenges()
-
-	host := c.Request.Host
-
-	c.JSON(http.StatusOK, gin.H{
-		"message":    "Server Generation API for CTF 🚩🚩",
-		"challenges": chall,
-		"Host":       host,
-	})
 }
 
 func create(c *gin.Context) {
@@ -179,7 +152,7 @@ func create(c *gin.Context) {
 
 	fmt.Println("create sandbox: " + imageName)
 
-	port := random_port()
+	hashId := GenerateId(c)
 
 	_, _, err = cli.ImageInspectWithRaw(ctx, imageName)
 	if err != nil {
@@ -219,10 +192,10 @@ func create(c *gin.Context) {
 		// TODO: add error handling
 		Image: imageName,
 		Labels: map[string]string{
-			"traefik.enable":                        "true",
-			"traefik.tcp.routers." + port + ".rule": "HostSNI(`" + port + "." + host[0] + "`)",
-			"traefik.tcp.routers." + port + ".tls":  "true",
-			"dklodd":                                "true",
+			"traefik.enable": "true",
+			"traefik.tcp.routers." + hashId + ".rule": "HostSNI(`" + hashId + "." + host[0] + "`)",
+			"traefik.tcp.routers." + hashId + ".tls":  "true",
+			"dklodd":                                  "true",
 		},
 	}
 
@@ -254,8 +227,8 @@ func create(c *gin.Context) {
 
 	c.HTML(http.StatusOK, "create.tmpl", gin.H{
 		"Connection": gin.H{
-			"ncat":    "ncat --ssl " + port + "." + host[0] + " " + host[1],
-			"openssl": "openssl s_client -connect " + port + "." + host[0] + ":" + host[1],
+			"ncat":    "ncat --ssl " + hashId + "." + host[0] + " " + host[1],
+			"openssl": "openssl s_client -connect " + hashId + "." + host[0] + ":" + host[1],
 		},
 		"Id": sandboxID[0:12],
 	})

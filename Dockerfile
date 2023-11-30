@@ -1,4 +1,4 @@
-FROM golang:alpine AS builder
+FROM golang:1.21.4-alpine AS builder
 
 RUN mkdir /app
 
@@ -7,17 +7,17 @@ WORKDIR /app
 COPY go.mod .
 COPY go.sum .
 
-RUN go mod tidy
+RUN go mod download
 
-COPY . .
+COPY *.go .
 
 RUN go build -o server .
 
-FROM alpine
+FROM alpine:3.18.4
 
 COPY --from=builder /app/server /app
-COPY --from=builder /app/challenges.json /challenges.json
-COPY --from=builder /app/templates /templates
+COPY challenges.json .
+COPY templates /templates
 
 EXPOSE 5000
 
