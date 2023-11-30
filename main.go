@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -22,54 +23,15 @@ import (
 
 var online_sandbox_ids []string
 
-func main() {
-
-	router := gin.Default()
-
-	router.LoadHTMLGlob("templates/*")
-
-	_, err := client.NewClientWithOpts()
-	if err != nil {
-		fmt.Println("Docker Client Error: ", err)
-	}
-
-	router.GET("/", func(c *gin.Context) {
-
-		chall, _ := load_challenges()
-		c.HTML(http.StatusOK, "index.tmpl", gin.H{
-			"challenges": chall,
-		})
-	})
-
-	router.GET("/:id", func(c *gin.Context) {
-
-		id := c.Param("id")
-
-		chall := get_chall(id)
-
-		c.HTML(http.StatusOK, "challenge.tmpl", chall)
-	})
-
-	router.GET("/:id/new", create)
-	router.GET("/:id/del", remove)
-
-	env := os.Getenv("SAN_PORT")
-	if env == "" {
-		env = "5000"
-	}
-
-	router.Run(":" + env)
+type challenge struct {
+	Image string
+	Name  string
+	Id    string
 }
 
 func GenerateId(data *gin.Context) string {
 	hash := sha1.Sum([]byte(data.ClientIP() + data.Request.UserAgent() + time.Now().String()))
 	return strings.ToLower(base64.RawURLEncoding.EncodeToString(hash[:])[:5])
-}
-
-type challenge struct {
-	Image string
-	Name  string
-	Id    string
 }
 
 func load_challenges() ([]challenge, error) {
@@ -101,6 +63,41 @@ func get_chall(id string) challenge {
 	}
 	number_id, _ := strconv.Atoi(id)
 	return chall[number_id]
+}
+
+func main() {
+
+	router := gin.Default()
+
+	router.LoadHTMLGlob("templates/*")
+
+	_, err := client.NewClientWithOpts()
+	if err != nil {
+		fmt.Println("Docker Client Error: ", err)
+	}
+
+	router.GET("/", func(c *gin.Context) {
+		chall, _ := load_challenges()
+		c.HTML(http.StatusOK, "index.tmpl", gin.H{
+			"challenges": chall,
+		})
+	})
+
+	router.GET("/:id", func(c *gin.Context) {
+		id := c.Param("id")
+		chall := get_chall(id)
+		c.HTML(http.StatusOK, "challenge.tmpl", chall)
+	})
+
+	router.GET("/:id/new", create)
+	router.GET("/:id/del", remove)
+
+	env := os.Getenv("SAN_PORT")
+	if env == "" {
+		env = "5000"
+	}
+
+	log.Fatal(router.Run(":" + env))
 }
 
 func create(c *gin.Context) {
