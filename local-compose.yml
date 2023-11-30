@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   dklodd:
-    image: minpeter/dklodd:latest
+    build: .
     container_name: dklodd
     restart: unless-stopped
     volumes:

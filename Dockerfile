@@ -4,9 +4,12 @@ RUN mkdir /app
 
 WORKDIR /app
 
-COPY . .
+COPY go.mod .
+COPY go.sum .
 
 RUN go mod tidy
+
+COPY . .
 
 RUN go build -o server .
 

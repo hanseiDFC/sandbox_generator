@@ -257,47 +257,46 @@ func create(c *gin.Context) {
 			"ncat":    "ncat --ssl " + port + "." + host[0] + " " + host[1],
 			"openssl": "openssl s_client -connect " + port + "." + host[0] + ":" + host[1],
 		},
-		".Id": sandboxID[0:12],
+		"Id": sandboxID[0:12],
 	})
 }
 
 func remove(c *gin.Context) {
 
+	sandbox_id := c.Param("id")
+
 	cli, err := client.NewClientWithOpts()
 	if err != nil {
 		panic(err)
 	}
-
 	ctx := context.Background()
-
-	sandbox_id := c.Param("id")
 	var message string
 
 	for _, online_sandbox_id := range online_sandbox_ids {
 		if online_sandbox_id == sandbox_id {
 			if err := cli.ContainerStop(ctx, sandbox_id, nil); err != nil {
-				panic(err)
+				message = "docker client error - 3: failed to stop container"
+				break
 			}
 
-			removeOptions := types.ContainerRemoveOptions{
+			if err := cli.ContainerRemove(ctx, sandbox_id, types.ContainerRemoveOptions{
 				RemoveVolumes: true,
 				Force:         true,
+			}); err != nil {
+				message = "docker client error - 4: failed to remove container"
+				break
 			}
 
-			if err := cli.ContainerRemove(ctx, sandbox_id, removeOptions); err != nil {
-				panic(err)
-			}
-
-			fmt.Println("remove sandbox: " + sandbox_id)
-
-			message = "remove sandbox: " + sandbox_id
-
+			message = "scuccessfully removed sandbox"
 			break
-
-		} else {
-			message = "can't find sandbox"
 		}
 	}
+
+	if message == "" {
+		message = "sandbox not found"
+	}
+
+	fmt.Println(message)
 
 	c.HTML(http.StatusOK, "remove.tmpl", gin.H{
 		"Message": message,
