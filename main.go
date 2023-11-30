@@ -3,17 +3,12 @@ package main
 import (
 	"bytes"
 	"context"
-	"crypto/sha1"
-	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -22,48 +17,6 @@ import (
 )
 
 var online_sandbox_ids []string
-
-type challenge struct {
-	Image string
-	Name  string
-	Id    string
-}
-
-func GenerateId(data *gin.Context) string {
-	hash := sha1.Sum([]byte(data.ClientIP() + data.Request.UserAgent() + time.Now().String()))
-	return strings.ToLower(base64.RawURLEncoding.EncodeToString(hash[:])[:5])
-}
-
-func load_challenges() ([]challenge, error) {
-	fileContent, err := os.ReadFile("challenges.json")
-	if err != nil {
-		return nil, err
-	}
-
-	// Unmarshal JSON content into an array of Challenge structs
-	var challenges []challenge
-	err = json.Unmarshal(fileContent, &challenges)
-	if err != nil {
-		return nil, err
-	}
-
-	var ChallengeId int
-	for i := 0; i < len(challenges); i++ {
-		ChallengeId = i
-		challenges[i].Id = strconv.Itoa(ChallengeId)
-	}
-
-	return challenges, nil
-}
-
-func get_chall(id string) challenge {
-	chall, err := load_challenges()
-	if err != nil {
-		panic(err)
-	}
-	number_id, _ := strconv.Atoi(id)
-	return chall[number_id]
-}
 
 func main() {
 
@@ -77,7 +30,7 @@ func main() {
 	}
 
 	router.GET("/", func(c *gin.Context) {
-		chall, _ := load_challenges()
+		chall, _ := GetAllChall()
 		c.HTML(http.StatusOK, "index.tmpl", gin.H{
 			"challenges": chall,
 		})
@@ -85,7 +38,7 @@ func main() {
 
 	router.GET("/:id", func(c *gin.Context) {
 		id := c.Param("id")
-		chall := get_chall(id)
+		chall := GetChallbyId(id)
 		c.HTML(http.StatusOK, "challenge.tmpl", chall)
 	})
 
@@ -144,7 +97,7 @@ func create(c *gin.Context) {
 
 	ctx := context.Background()
 
-	chall := get_chall(challenge_id)
+	chall := GetChallbyId(challenge_id)
 	imageName := chall.Image
 
 	fmt.Println("create sandbox: " + imageName)
@@ -186,7 +139,6 @@ func create(c *gin.Context) {
 	}
 
 	config := &container.Config{
-		// TODO: add error handling
 		Image: imageName,
 		Labels: map[string]string{
 			"traefik.enable": "true",
