@@ -22,7 +22,7 @@ func main() {
 
 	router := gin.Default()
 
-	router.LoadHTMLGlob("templates/*")
+	router.LoadHTMLGlob("templates/components/*")
 
 	_, err := client.NewClientWithOpts()
 	if err != nil {
@@ -31,7 +31,8 @@ func main() {
 
 	router.GET("/", func(c *gin.Context) {
 		chall, _ := GetAllChall()
-		c.HTML(http.StatusOK, "index.tmpl", gin.H{
+
+		RenderTemplates(c, gin.H{
 			"challenges": chall,
 		})
 	})
@@ -39,7 +40,8 @@ func main() {
 	router.GET("/:id", func(c *gin.Context) {
 		id := c.Param("id")
 		chall := GetChallbyId(id)
-		c.HTML(http.StatusOK, "challenge.tmpl", chall)
+
+		RenderTemplates(c, chall, "challenge")
 	})
 
 	router.GET("/:id/new", create)
