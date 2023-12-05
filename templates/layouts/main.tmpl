@@ -4,12 +4,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://unpkg.com/htmx.org@1.9.9"
-    integrity="sha384-QFjmbokDn2DjBjq+fM+8LUIVrAgqcNW2s0PjAxHETgRn9l4fvX31ZxDxvwQnyMOX"
-    crossorigin="anonymous"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.9/dist/htmx.min.js"></script>
   <script src="https://unpkg.com/clipboard@2/dist/clipboard.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
   <title>DKLODD</title>
+
+  <style>
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #1a202c;
+        /* Dark background color */
+        --text-color: #ffffff;
+        /* Light text color */
+      }
+    }
+
+    body {
+      background-color: var(--bg-color, #ffffff);
+      /* Default to light background color */
+      color: var(--text-color, #333333);
+      /* Default to dark text color */
+    }
+  </style>
 </head>
 
 <body class="max-w-screen-md mx-auto p-4">
