@@ -19,6 +19,6 @@ COPY --from=builder /app/server /app
 COPY challenges.json .
 COPY templates /templates
 
-EXPOSE 5000
+EXPOSE 8000
 
 CMD /app

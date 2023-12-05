@@ -49,10 +49,10 @@ func main() {
 
 	env := os.Getenv("SAN_PORT")
 	if env == "" {
-		env = "5000"
+		env = "8000"
 	}
 
-	log.Fatal(router.Run(":" + env))
+	log.Fatal(router.Run("localhost:" + env))
 }
 
 func create(c *gin.Context) {
@@ -166,6 +166,7 @@ func create(c *gin.Context) {
 
 	// Start the container
 	if err := cli.ContainerStart(ctx, sandboxID, types.ContainerStartOptions{}); err != nil {
+		fmt.Println("Failed to start container:", err) // 에러 메시지 출력
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "docker client error - 3: failed to start container",
 		})
