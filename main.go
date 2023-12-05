@@ -44,6 +44,9 @@ func main() {
 		RenderTemplates(c, chall, "challenge")
 	})
 
+	// assets폴더 서빙
+	router.Static("/assets", "templates/assets")
+
 	router.GET("/:id/new", create)
 	router.GET("/:id/del", remove)
 
@@ -233,8 +236,19 @@ func remove(c *gin.Context) {
 
 	fmt.Println(message)
 
-	c.HTML(http.StatusOK, "remove.tmpl", gin.H{
-		"Message": message,
-		"Id":      sandbox_id,
-	})
+	// c.HTML(http.StatusOK, "remove.tmpl", gin.H{
+	// 	"Message": message,
+	// 	"Id":      sandbox_id,
+	// })
+
+	id := c.GetHeader("HX-Current-URL")
+
+	// id에서 / 제거
+	id = strings.Replace(id, "/", "", -1)
+
+	chall := GetChallbyId(id)
+
+	chall.Message = message + " - " + sandbox_id
+
+	RenderTemplates(c, chall, "challenge")
 }

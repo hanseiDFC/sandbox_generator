@@ -17,9 +17,10 @@ import (
 )
 
 type Challenge struct {
-	Image string
-	Name  string
-	Id    string
+	Image   string
+	Name    string
+	Id      string
+	Message string
 }
 
 func GenerateId(data *gin.Context) string {
