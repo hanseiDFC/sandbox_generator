@@ -11,6 +11,9 @@ services:
       - --entrypoints.web.address=:80
       - --providers.file.filename=/traefik-ext-dklodd.toml
       - --providers.file.watch=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=traefik
     ports:
       - 8080:80
     extra_hosts:
