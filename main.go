@@ -52,7 +52,7 @@ func main() {
 		env = "8000"
 	}
 
-	log.Fatal(router.Run("localhost:" + env))
+	log.Fatal(router.Run(":" + env))
 }
 
 func create(c *gin.Context) {
