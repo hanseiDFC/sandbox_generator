@@ -13,6 +13,8 @@ services:
       - traefik.http.routers.sandbox-generator.rule=Host(`dklodd.minpeter.tech`)
     networks:
       - traefik
+    environment:
+      - PRODUCTION=true
 networks:
   traefik:
     external: true

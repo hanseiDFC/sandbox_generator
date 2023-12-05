@@ -52,7 +52,17 @@ func main() {
 		env = "8000"
 	}
 
-	log.Fatal(router.Run(":" + env))
+	isProduction := os.Getenv("PRODUCTION")
+	var host string
+	if isProduction == "" {
+		gin.SetMode(gin.DebugMode)
+		host = "localhost:" + env
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+		host = ":" + env
+	}
+
+	log.Fatal(router.Run(host))
 }
 
 func create(c *gin.Context) {
