@@ -28,9 +28,20 @@
   </style>
 </head>
 
-<body class="max-w-screen-md mx-auto p-4">
+<body>
 
-  {{template "content" .}}
+  <header class="bg-gray-800 bg-opacity-75 fixed top-0 left-0 right-0 z-50 py-2 text-white italic transparent-header">
+    <div class="container mx-auto">
+      <h1 class="text-3xl font-bold ml-4 cursor-pointer" hx-get="/" hx-target="main" hx-push-url="true"
+        hx-trigger="click">dklodd</h1>
+    </div>
+  </header>
+
+
+
+  <main class="max-w-screen-md mx-auto mt-16 p-8">
+    {{template "content" .}}
+  </main>
 
 </body>
 
