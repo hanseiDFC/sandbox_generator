@@ -25,13 +25,13 @@ func GetOnlineSandbox() []Challenge {
 	if err != nil {
 		panic(err)
 	}
-	// []{Id, Name} 식으로 반환
 
 	var resp []Challenge
-	for _, online_sandbox_id := range online_sandbox_ids {
+	for i, online_sandbox_id := range online_sandbox_ids {
 		data, err := cli.ContainerInspect(context.Background(), online_sandbox_id)
 		if err != nil {
 			fmt.Println("Failed to inspect container:", err) // 에러 메시지 출력
+			online_sandbox_ids = append(online_sandbox_ids[:i], online_sandbox_ids[i+1:]...)
 			continue
 		}
 
@@ -214,6 +214,15 @@ func create(c *gin.Context) {
 		},
 	}
 
+	if chall.Type == "web" {
+		config.Labels = map[string]string{
+			"traefik.enable": "true",
+			"traefik.http.routers." + hashId + ".rule": "Host(`" + hashId + "." + host[0] + "`)",
+			"traefik.http.routers." + hashId + ".tls":  "true",
+			"dklodd": "true",
+		}
+	}
+
 	hostConfig := &container.HostConfig{
 		NetworkMode: "traefik",
 	}
@@ -241,13 +250,27 @@ func create(c *gin.Context) {
 
 	online_sandbox_ids = append(online_sandbox_ids, sandboxID[0:12])
 
-	c.HTML(http.StatusOK, "create.tmpl", gin.H{
-		"Connection": gin.H{
-			"ncat":    "ncat --ssl " + hashId + "." + host[0] + " " + host[1],
-			"openssl": "openssl s_client -connect " + hashId + "." + host[0] + ":" + host[1],
-		},
-		"Id": sandboxID[0:12],
-	})
+	if chall.Type == "web" {
+
+		connection := "https://" + hashId + "." + host[0]
+
+		if host[1] != "443" {
+			connection += ":" + host[1]
+		}
+
+		c.HTML(http.StatusOK, "web.tmpl", gin.H{
+			"Connection": connection,
+			"Id":         sandboxID[0:12],
+		})
+	} else {
+		c.HTML(http.StatusOK, "tcp.tmpl", gin.H{
+			"Connection": gin.H{
+				"ncat":    "ncat --ssl " + hashId + "." + host[0] + " " + host[1],
+				"openssl": "openssl s_client -connect " + hashId + "." + host[0] + ":" + host[1],
+			},
+			"Id": sandboxID[0:12],
+		})
+	}
 }
 
 func remove(c *gin.Context) {

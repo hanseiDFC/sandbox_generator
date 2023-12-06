@@ -1,0 +1,25 @@
+<h2 class="text-2xl font-bold mb-4">How to connect to the challenge?</h2>
+
+<div class="flex mb-4 items-center">
+  <p class="mr-2">{{.Connection}}</p>
+  <button class="btn bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+    data-clipboard-text="{{.Connection}}">Copy</button>
+</div>
+
+<button class="bg-red-500 hover:bg-red-700 text-white text-white font-bold py-2 px-4 rounded" hx-get="/{{.Id}}/del"
+  hx-target="#challContainer">Delete Instance</button>
+
+
+<script>
+  var clipboard = new ClipboardJS('.btn');
+
+  clipboard.on('success', function (e) {
+    alert("복사성공!");
+
+    e.clearSelection();
+  });
+
+  clipboard.on('error', function (e) {
+    alert("복사실패!");
+  });
+</script>

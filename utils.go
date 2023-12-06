@@ -21,6 +21,7 @@ type Challenge struct {
 	Name    string
 	Id      string
 	Message string
+	Type    string
 }
 
 func GenerateId(data *gin.Context) string {
