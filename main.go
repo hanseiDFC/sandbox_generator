@@ -23,9 +23,29 @@ func GetOnlineSandbox() []string {
 	return online_sandbox_ids
 }
 
+func LoadOnlineSandbox() {
+	cli, err := client.NewClientWithOpts()
+	if err != nil {
+		panic(err)
+	}
+	ctx := context.Background()
+
+	containers, err := cli.ContainerList(ctx, types.ContainerListOptions{})
+	if err != nil {
+		panic(err)
+	}
+
+	for _, container := range containers {
+		if container.Labels["dklodd"] == "true" {
+			online_sandbox_ids = append(online_sandbox_ids, container.ID[0:12])
+		}
+	}
+}
+
 func main() {
 
 	router := gin.Default()
+	LoadOnlineSandbox()
 
 	router.LoadHTMLGlob("templates/components/*")
 
