@@ -47,6 +47,32 @@ func GetOnlineSandbox() []Challenge {
 
 }
 
+func ResetSandbox() {
+	cli, err := client.NewClientWithOpts()
+	if err != nil {
+		panic(err)
+	}
+	ctx := context.Background()
+
+	for _, online_sandbox_id := range online_sandbox_ids {
+		if err := cli.ContainerStop(ctx, online_sandbox_id, nil); err != nil {
+			fmt.Println("Failed to stop container:", err) // 에러 메시지 출력
+			continue
+		}
+
+		if err := cli.ContainerRemove(ctx, online_sandbox_id, types.ContainerRemoveOptions{
+			RemoveVolumes: true,
+			Force:         true,
+		}); err != nil {
+			fmt.Println("Failed to remove container:", err) // 에러 메시지 출력
+			continue
+		}
+	}
+
+	online_sandbox_ids = nil
+
+}
+
 func LoadOnlineSandbox() {
 	cli, err := client.NewClientWithOpts()
 	if err != nil {
@@ -317,9 +343,7 @@ func remove(c *gin.Context) {
 	fmt.Println(message)
 
 	id := c.GetHeader("HX-Current-URL")
-
-	// id에서 / 제거
-	id = strings.Replace(id, "/", "", -1)
+	id = strings.Split(id, "/")[len(strings.Split(id, "/"))-1]
 
 	chall := GetChallbyId(id)
 

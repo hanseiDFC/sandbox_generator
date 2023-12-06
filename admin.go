@@ -25,10 +25,16 @@ func adminRouter(admin *gin.RouterGroup) {
 
 	admin.POST("/image/del", removeContainerHandler)
 
+	admin.POST("/image/pull", pullImageHandler)
+
 	admin.GET("/online", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "online.tmpl", gin.H{
 			"online": GetOnlineSandbox(),
 		})
+	})
+
+	admin.POST("/instance/reset", func(c *gin.Context) {
+		ResetSandbox()
 	})
 
 	admin.GET("/online/sse", func(c *gin.Context) {
@@ -61,6 +67,25 @@ func adminRouter(admin *gin.RouterGroup) {
 			}
 		}
 	})
+}
+
+func pullImageHandler(c *gin.Context) {
+	dockerImage := c.PostForm("dockerImage")
+
+	// Validate input (you can add more validation logic)
+	if dockerImage == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		return
+	}
+
+	PullImage(dockerImage)
+
+	chall, _ := GetAllChall()
+	RenderTemplates(c, gin.H{
+		"challenges": chall,
+		"Message":    "Image Pulled!",
+	}, "admin")
+
 }
 
 func createContainerHandler(c *gin.Context) {

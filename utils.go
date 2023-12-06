@@ -2,9 +2,11 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"crypto/sha1"
 	"encoding/base64"
 	"encoding/json"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -13,6 +15,8 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/client"
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,6 +26,20 @@ type Challenge struct {
 	Id      string
 	Message string
 	Type    string
+}
+
+func PullImage(image string) {
+	cli, err := client.NewClientWithOpts()
+	if err != nil {
+		panic(err)
+	}
+
+	out, err := cli.ImagePull(context.Background(), image, types.ImagePullOptions{})
+	if err != nil {
+		panic(err)
+	}
+
+	io.Copy(os.Stdout, out)
 }
 
 func GenerateId(data *gin.Context) string {

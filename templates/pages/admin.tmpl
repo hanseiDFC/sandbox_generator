@@ -2,7 +2,11 @@
 
 <div id="adminContainer">
 
-  <h1 class="text-2xl font-bold mb-4">Docker Admin Page</h1>
+  <h1 class="text-2xl font-bold mb-4">Docker Admin Page
+    {{if .Message}}
+    - {{.Message}}
+    {{end}}
+  </h1>
 
 
 
@@ -17,6 +21,11 @@
         <input type="hidden" name="containerName" value={{$chall.Name}}>
         <button type="submit" class="px-3 py-1 bg-red-500 rounded">Delete</button>
       </form>
+      <!-- pull new image button -->
+      <form class="ml-2" hx-post="image/pull" hx-target="#adminContainer">
+        <input type="hidden" name="dockerImage" value={{$chall.Image}}>
+        <button type="submit" class="px-3 py-1 bg-green-500 rounded">Pull</button>
+      </form>
       <button class="bg-blue-500 hover:bg-blue-700 px-3 py-1 rounded ml-2" hx-get="/{{.Id}}/new"
         hx-swap="none">Test</button>
     </div>
@@ -24,7 +33,7 @@
   </section>
 
   <!-- Create Container Section -->
-  <section class=" shadow-md rounded-lg">
+  <section class="mb-8">
     <h2 class="text-xl font-semibold mb-4">Add Image</h2>
     <form id="createContainerForm" hx-post="image/add" hx-target="#adminContainer" class="space-y-4">
       <div class="flex flex-col">
@@ -37,7 +46,6 @@
         <input type="text" id="dockerImage" name="dockerImage" class=" rounded p-2 bg-gray-700" required>
       </div>
 
-      <!-- select type (tcp or web) (라디오 버튼) -->
       <div class="flex flex-col">
         <label for="type" class="text-sm">Type:</label>
         <div class="flex items-center">
@@ -54,13 +62,13 @@
         class="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:shadow-outline-blue active:bg-blue-800 transition duration-150 ease-in-out">Add
         Image</button>
     </form>
-
-    <!-- 메세지 텍스트 자리 -->
-    <div class="text-sm mt-4">{{.Message}}</div>
   </section>
 
   <section id="onlineContainersSection" class="mb-8">
     <h2 class="text-xl font-semibold mb-4">Online Containers</h2>
+
+    <button hx-post="instance/reset" hx-swap="none"
+      class="w-full px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 mb-6">Delete All</button>
     <div hx-sse="connect:online/sse swap:message">
       loading...
     </div>
