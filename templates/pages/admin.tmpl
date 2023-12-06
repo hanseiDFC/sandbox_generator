@@ -1,0 +1,49 @@
+{{define "content"}}
+
+<div id="adminContainer">
+
+  <h1 class="text-2xl font-bold mb-4">Docker Admin Page</h1>
+
+
+
+  <section class="mb-8">
+    <h2 class="text-xl font-semibold mb-4">Registered Docker Images</h2>
+    {{range $indxe, $chall := .challenges}}
+    <div class="flex items-center mb-4 bg-gray-700 rounded-lg p-2 text-white">
+      <div>
+        {{$chall.Name}} / {{$chall.Image}}
+      </div>
+      <form class="ml-auto" hx-post="image/del" hx-target="#adminContainer">
+        <input type="hidden" name="containerName" value={{$chall.Name}}>
+        <button type="submit" class="px-3 py-1 bg-red-500 rounded">Delete</button>
+      </form>
+    </div>
+    {{end}}
+  </section>
+
+  <!-- Create Container Section -->
+  <section class=" shadow-md rounded-lg p-6">
+    <h2 class="text-xl font-semibold mb-4">Add Image</h2>
+    <form id="createContainerForm" hx-post="image/add" hx-target="#adminContainer" class="space-y-4">
+      <div class="flex flex-col">
+        <label for="containerName" class="text-sm">Container Name:</label>
+        <input type="text" id="containerName" name="containerName" class=" rounded p-2 bg-gray-700" required>
+      </div>
+
+      <div class="flex flex-col">
+        <label for="dockerImage" class="text-sm">Docker Image:</label>
+        <input type="text" id="dockerImage" name="dockerImage" class=" rounded p-2 bg-gray-700" required>
+      </div>
+
+      <button type="submit"
+        class="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:shadow-outline-blue active:bg-blue-800 transition duration-150 ease-in-out">Add
+        Image</button>
+    </form>
+
+    <!-- 메세지 텍스트 자리 -->
+    <div class="text-sm mt-4">{{.Message}}</div>
+  </section>
+
+</div>
+
+{{end}}

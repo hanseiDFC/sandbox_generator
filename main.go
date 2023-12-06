@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"runtime"
 	"strings"
 
 	"github.com/docker/docker/api/types"
@@ -44,25 +45,27 @@ func main() {
 		RenderTemplates(c, chall, "challenge")
 	})
 
-	// assets폴더 서빙
 	router.Static("/assets", "templates/assets")
 
 	router.GET("/:id/new", create)
 	router.GET("/:id/del", remove)
 
-	env := os.Getenv("SAN_PORT")
+	// 어드민 전용 라우터 생성
+	admin := router.Group("/admin", gin.BasicAuth(gin.Accounts{
+		"admin": "admin",
+	}))
+
+	adminRouter(admin)
+
+	env := os.Getenv("PORT")
 	if env == "" {
 		env = "8000"
 	}
 
-	isProduction := os.Getenv("PRODUCTION")
-	var host string
-	if isProduction == "" {
-		gin.SetMode(gin.DebugMode)
+	host := ":" + env
+	// Removes the “accept incoming network connections?” pop-up on Macos.
+	if runtime.GOOS == "darwin" {
 		host = "localhost:" + env
-	} else {
-		gin.SetMode(gin.ReleaseMode)
-		host = ":" + env
 	}
 
 	log.Fatal(router.Run(host))

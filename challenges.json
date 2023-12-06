@@ -1,18 +1,1 @@
-[
-  {
-    "name": "minw",
-    "image": "minpeter/mathematician-in-wonderland"
-  },
-  {
-    "name": "cmd-inject",
-    "image": "minpeter/command-injection"
-  },
-  {
-    "name": "sandbox",
-    "image": "minpeter/sandbox"
-  },
-  {
-    "name": "socat",
-    "image": "minpeter/socat-test"
-  }
-]
+[{"Image":"minpeter/mathematician-in-wonderland","Name":"minw","Id":"0","Message":""},{"Image":"minpeter/command-injection","Name":"cmd-inject","Id":"1","Message":""},{"Image":"minpeter/socat-test","Name":"socat","Id":"2","Message":""},{"Image":"minpeter/sandbox","Name":"sandbox","Id":"","Message":""}]

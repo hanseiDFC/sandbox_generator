@@ -50,6 +50,48 @@ func GetAllChall() ([]Challenge, error) {
 	return challenges, nil
 }
 
+func AddChall(chall Challenge) {
+	challenges, err := GetAllChall()
+	if err != nil {
+		panic(err)
+	}
+
+	challenges = append(challenges, chall)
+
+	challengesJson, err := json.Marshal(challenges)
+	if err != nil {
+		panic(err)
+	}
+
+	err = os.WriteFile("challenges.json", challengesJson, 0644)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func RemoveChall(challName string) {
+	challenges, err := GetAllChall()
+	if err != nil {
+		panic(err)
+	}
+
+	for i := 0; i < len(challenges); i++ {
+		if challenges[i].Name == challName {
+			challenges = append(challenges[:i], challenges[i+1:]...)
+		}
+	}
+
+	challengesJson, err := json.Marshal(challenges)
+	if err != nil {
+		panic(err)
+	}
+
+	err = os.WriteFile("challenges.json", challengesJson, 0644)
+	if err != nil {
+		panic(err)
+	}
+}
+
 func GetChallbyId(id string) Challenge {
 	chall, err := GetAllChall()
 	if err != nil {
