@@ -17,6 +17,8 @@
         <input type="hidden" name="containerName" value={{$chall.Name}}>
         <button type="submit" class="px-3 py-1 bg-red-500 rounded">Delete</button>
       </form>
+      <button class="bg-blue-500 hover:bg-blue-700 px-3 py-1 rounded ml-2" hx-get="/{{.Id}}/new"
+        hx-swap="none">Test</button>
     </div>
     {{end}}
   </section>
@@ -46,9 +48,7 @@
 
   <section id="onlineContainersSection" class="mb-8">
     <h2 class="text-xl font-semibold mb-4">Online Containers</h2>
-    <div id="onlineContainersContent" hx-trigger="every 5s" hx-get="online">
-      <!-- Container information will be dynamically loaded here -->
-
+    <div hx-sse="connect:online/sse swap:message">
       loading...
     </div>
   </section>

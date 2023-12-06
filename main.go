@@ -252,6 +252,12 @@ func remove(c *gin.Context) {
 				break
 			}
 
+			for i, online_sandbox_id := range online_sandbox_ids {
+				if online_sandbox_id == sandbox_id {
+					online_sandbox_ids = append(online_sandbox_ids[:i], online_sandbox_ids[i+1:]...)
+				}
+			}
+
 			message = "scuccessfully removed sandbox"
 			break
 		}
@@ -262,11 +268,6 @@ func remove(c *gin.Context) {
 	}
 
 	fmt.Println(message)
-
-	// c.HTML(http.StatusOK, "remove.tmpl", gin.H{
-	// 	"Message": message,
-	// 	"Id":      sandbox_id,
-	// })
 
 	id := c.GetHeader("HX-Current-URL")
 
