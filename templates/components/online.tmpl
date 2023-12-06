@@ -1,10 +1,12 @@
 {{range $index, $container := .}}
 <div class="flex items-center mb-4 bg-gray-700 rounded-lg p-2 text-white">
   <div>
-    <p class="mr-2">Container ID: {{$container}}</p>
-    <p class="mr-2">Container Name: AAAAAA</p>
+    <p class="mr-2">Container ID: {{$container.Id}}</p>
+    <p class="mr-2">Container Name: {{$container.Name}}</p>
+    <!-- status -->
+    <p class="mr-2">Status: {{$container.Message}}</p>
   </div>
 
-  <button hx-get="/{{$container}}/del" hx-swap="delete" class="px-3 py-1 bg-red-500 rounded ml-auto">Stop</button>
+  <button hx-get="/{{$container.Id}}/del" hx-swap="delete" class="px-3 py-1 bg-red-500 rounded ml-auto">Stop</button>
 </div>
 {{end}}

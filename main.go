@@ -19,8 +19,32 @@ import (
 
 var online_sandbox_ids []string
 
-func GetOnlineSandbox() []string {
-	return online_sandbox_ids
+func GetOnlineSandbox() []Challenge {
+
+	cli, err := client.NewClientWithOpts()
+	if err != nil {
+		panic(err)
+	}
+	// []{Id, Name} 식으로 반환
+
+	var resp []Challenge
+	for _, online_sandbox_id := range online_sandbox_ids {
+		data, err := cli.ContainerInspect(context.Background(), online_sandbox_id)
+		if err != nil {
+			fmt.Println("Failed to inspect container:", err) // 에러 메시지 출력
+			continue
+		}
+
+		resp = append(resp, Challenge{
+			Id:      data.ID[0:12],
+			Name:    data.Config.Image,
+			Message: data.State.Status,
+		})
+
+	}
+
+	return resp
+
 }
 
 func LoadOnlineSandbox() {
