@@ -19,6 +19,10 @@ import (
 
 var online_sandbox_ids []string
 
+func GetOnlineSandbox() []string {
+	return online_sandbox_ids
+}
+
 func main() {
 
 	router := gin.Default()

@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,6 +15,14 @@ func adminRouter(admin *gin.RouterGroup) {
 			"challenges": chall,
 		}, "admin")
 	})
+	admin.GET("/online", func(c *gin.Context) {
+		online := GetOnlineSandbox()
+
+		resp := strings.Join(online, "<br />")
+
+		c.String(http.StatusOK, resp)
+	})
+
 	admin.POST("/image/add", createContainerHandler)
 
 	admin.POST("/image/del", removeContainerHandler)
