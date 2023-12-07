@@ -59,7 +59,7 @@ func adminRouter(admin *gin.RouterGroup) {
 					return
 				}
 
-				fmt.Fprintf(c.Writer, "data: %s\n\n", strings.ReplaceAll(buf.String(), "\n", ""))
+				_, _ = fmt.Fprintf(c.Writer, "data: %s\n\n", strings.ReplaceAll(buf.String(), "\n", ""))
 				c.Writer.Flush()
 
 			case <-c.Writer.CloseNotify():

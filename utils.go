@@ -39,7 +39,7 @@ func PullImage(image string) {
 		panic(err)
 	}
 
-	io.Copy(os.Stdout, out)
+	_, _ = io.Copy(os.Stdout, out)
 }
 
 func GenerateId(data *gin.Context) string {
@@ -116,8 +116,8 @@ func GetChallbyId(id string) Challenge {
 	if err != nil {
 		panic(err)
 	}
-	number_id, _ := strconv.Atoi(id)
-	return chall[number_id]
+	numberId, _ := strconv.Atoi(id)
+	return chall[numberId]
 }
 
 func RenderTemplates(c *gin.Context, Data any, optionTemplateName ...string) {

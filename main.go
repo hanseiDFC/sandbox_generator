@@ -17,7 +17,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var online_sandbox_ids []string
+var onlineSandboxIds []string
 
 func GetOnlineSandbox() []Challenge {
 
@@ -27,11 +27,11 @@ func GetOnlineSandbox() []Challenge {
 	}
 
 	var resp []Challenge
-	for i, online_sandbox_id := range online_sandbox_ids {
-		data, err := cli.ContainerInspect(context.Background(), online_sandbox_id)
+	for i, onlineSandboxId := range onlineSandboxIds {
+		data, err := cli.ContainerInspect(context.Background(), onlineSandboxId)
 		if err != nil {
 			fmt.Println("Failed to inspect container:", err) // 에러 메시지 출력
-			online_sandbox_ids = append(online_sandbox_ids[:i], online_sandbox_ids[i+1:]...)
+			onlineSandboxIds = append(onlineSandboxIds[:i], onlineSandboxIds[i+1:]...)
 			continue
 		}
 
@@ -54,13 +54,13 @@ func ResetSandbox() {
 	}
 	ctx := context.Background()
 
-	for _, online_sandbox_id := range online_sandbox_ids {
-		if err := cli.ContainerStop(ctx, online_sandbox_id, nil); err != nil {
+	for _, onlineSandboxId := range onlineSandboxIds {
+		if err := cli.ContainerStop(ctx, onlineSandboxId, nil); err != nil {
 			fmt.Println("Failed to stop container:", err) // 에러 메시지 출력
 			continue
 		}
 
-		if err := cli.ContainerRemove(ctx, online_sandbox_id, types.ContainerRemoveOptions{
+		if err := cli.ContainerRemove(ctx, onlineSandboxId, types.ContainerRemoveOptions{
 			RemoveVolumes: true,
 			Force:         true,
 		}); err != nil {
@@ -69,7 +69,7 @@ func ResetSandbox() {
 		}
 	}
 
-	online_sandbox_ids = nil
+	onlineSandboxIds = nil
 
 }
 
@@ -85,9 +85,9 @@ func LoadOnlineSandbox() {
 		panic(err)
 	}
 
-	for _, container := range containers {
-		if container.Labels["dklodd"] == "true" {
-			online_sandbox_ids = append(online_sandbox_ids, container.ID[0:12])
+	for _, instance := range containers {
+		if instance.Labels["dklodd"] == "true" {
+			onlineSandboxIds = append(onlineSandboxIds, instance.ID[0:12])
 		}
 	}
 }
@@ -137,7 +137,7 @@ func main() {
 	}
 
 	host := ":" + env
-	// Removes the “accept incoming network connections?” pop-up on Macos.
+	// Removes the “accept incoming network connections?” pop-up on macOS.
 	if runtime.GOOS == "darwin" {
 		host = "localhost:" + env
 	}
@@ -154,7 +154,7 @@ func create(c *gin.Context) {
 		return
 	}
 
-	challenge_id := c.Param("id")
+	challengeID := c.Param("id")
 
 	host := strings.Split(c.Request.Host, ":")
 
@@ -180,7 +180,7 @@ func create(c *gin.Context) {
 
 	// get hostname from url
 
-	if challenge_id == "" {
+	if challengeID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "id is empty",
 		})
@@ -189,7 +189,7 @@ func create(c *gin.Context) {
 
 	ctx := context.Background()
 
-	chall := GetChallbyId(challenge_id)
+	chall := GetChallbyId(challengeID)
 	imageName := chall.Image
 
 	fmt.Println("create sandbox: " + imageName)
@@ -274,7 +274,7 @@ func create(c *gin.Context) {
 
 	fmt.Println("create sandbox: " + sandboxID[0:12])
 
-	online_sandbox_ids = append(online_sandbox_ids, sandboxID[0:12])
+	onlineSandboxIds = append(onlineSandboxIds, sandboxID[0:12])
 
 	if chall.Type == "web" {
 
@@ -301,7 +301,7 @@ func create(c *gin.Context) {
 
 func remove(c *gin.Context) {
 
-	sandbox_id := c.Param("id")
+	sandboxId := c.Param("id")
 
 	cli, err := client.NewClientWithOpts()
 	if err != nil {
@@ -310,14 +310,14 @@ func remove(c *gin.Context) {
 	ctx := context.Background()
 	var message string
 
-	for _, online_sandbox_id := range online_sandbox_ids {
-		if online_sandbox_id == sandbox_id {
-			if err := cli.ContainerStop(ctx, sandbox_id, nil); err != nil {
+	for _, onlineSandboxId := range onlineSandboxIds {
+		if onlineSandboxId == sandboxId {
+			if err := cli.ContainerStop(ctx, sandboxId, nil); err != nil {
 				message = "docker client error - 3: failed to stop container"
 				break
 			}
 
-			if err := cli.ContainerRemove(ctx, sandbox_id, types.ContainerRemoveOptions{
+			if err := cli.ContainerRemove(ctx, sandboxId, types.ContainerRemoveOptions{
 				RemoveVolumes: true,
 				Force:         true,
 			}); err != nil {
@@ -325,13 +325,13 @@ func remove(c *gin.Context) {
 				break
 			}
 
-			for i, online_sandbox_id := range online_sandbox_ids {
-				if online_sandbox_id == sandbox_id {
-					online_sandbox_ids = append(online_sandbox_ids[:i], online_sandbox_ids[i+1:]...)
+			for i, onlineSandboxId := range onlineSandboxIds {
+				if onlineSandboxId == sandboxId {
+					onlineSandboxIds = append(onlineSandboxIds[:i], onlineSandboxIds[i+1:]...)
 				}
 			}
 
-			message = "scuccessfully removed sandbox"
+			message = "successfully removed sandbox"
 			break
 		}
 	}
@@ -347,7 +347,7 @@ func remove(c *gin.Context) {
 
 	chall := GetChallbyId(id)
 
-	chall.Message = message + " - " + sandbox_id
+	chall.Message = message + " - " + sandboxId
 
 	RenderTemplates(c, chall, "challenge")
 }
