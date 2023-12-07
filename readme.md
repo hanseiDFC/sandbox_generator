@@ -27,5 +27,5 @@ docker compose -f local-compose.yml up -d
 ### shutdown all containers
 
 ```bash
-docker rm -f $(docker ps -qaf "label=dklodd=true")
+docker rm -f $(docker ps -qaf "label=dklodd")
 ```
