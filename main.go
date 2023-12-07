@@ -209,9 +209,9 @@ func create(c *gin.Context) {
 		})
 	} else {
 		c.HTML(http.StatusOK, "tcp.tmpl", gin.H{
-			"Connection": gin.H{
-				"ncat":    "ncat --ssl " + hashId + "." + host[0] + " " + host[1],
-				"openssl": "openssl s_client -connect " + hashId + "." + host[0] + ":" + host[1],
+			"Connection": []string{
+				"ncat --ssl " + hashId + "." + host[0] + " " + host[1],
+				"openssl s_client -connect " + hashId + "." + host[0] + ":" + host[1],
 			},
 			"Id": sandboxID[0:12],
 		})
