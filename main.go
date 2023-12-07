@@ -17,81 +17,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var onlineSandboxIds []string
-
-func GetOnlineSandbox() []Challenge {
-
-	cli, err := client.NewClientWithOpts()
-	if err != nil {
-		panic(err)
-	}
-
-	var resp []Challenge
-	for i, onlineSandboxId := range onlineSandboxIds {
-		data, err := cli.ContainerInspect(context.Background(), onlineSandboxId)
-		if err != nil {
-			fmt.Println("Failed to inspect container:", err) // 에러 메시지 출력
-			onlineSandboxIds = append(onlineSandboxIds[:i], onlineSandboxIds[i+1:]...)
-			continue
-		}
-
-		resp = append(resp, Challenge{
-			Id:      data.ID[0:12],
-			Name:    data.Config.Image,
-			Message: data.State.Status,
-		})
-
-	}
-
-	return resp
-
-}
-
-func ResetSandbox() {
-	cli, err := client.NewClientWithOpts()
-	if err != nil {
-		panic(err)
-	}
-	ctx := context.Background()
-
-	for _, onlineSandboxId := range onlineSandboxIds {
-		if err := cli.ContainerStop(ctx, onlineSandboxId, nil); err != nil {
-			fmt.Println("Failed to stop container:", err) // 에러 메시지 출력
-			continue
-		}
-
-		if err := cli.ContainerRemove(ctx, onlineSandboxId, types.ContainerRemoveOptions{
-			RemoveVolumes: true,
-			Force:         true,
-		}); err != nil {
-			fmt.Println("Failed to remove container:", err) // 에러 메시지 출력
-			continue
-		}
-	}
-
-	onlineSandboxIds = nil
-
-}
-
-func LoadOnlineSandbox() {
-	cli, err := client.NewClientWithOpts()
-	if err != nil {
-		panic(err)
-	}
-	ctx := context.Background()
-
-	containers, err := cli.ContainerList(ctx, types.ContainerListOptions{})
-	if err != nil {
-		panic(err)
-	}
-
-	for _, instance := range containers {
-		if instance.Labels["dklodd"] == "true" {
-			onlineSandboxIds = append(onlineSandboxIds, instance.ID[0:12])
-		}
-	}
-}
-
 func main() {
 
 	router := gin.Default()
@@ -274,7 +199,7 @@ func create(c *gin.Context) {
 
 	fmt.Println("create sandbox: " + sandboxID[0:12])
 
-	onlineSandboxIds = append(onlineSandboxIds, sandboxID[0:12])
+	OnlineSandboxIds = append(OnlineSandboxIds, sandboxID[0:12])
 
 	if chall.Type == "web" {
 
@@ -310,7 +235,7 @@ func remove(c *gin.Context) {
 	ctx := context.Background()
 	var message string
 
-	for _, onlineSandboxId := range onlineSandboxIds {
+	for _, onlineSandboxId := range OnlineSandboxIds {
 		if onlineSandboxId == sandboxId {
 			if err := cli.ContainerStop(ctx, sandboxId, nil); err != nil {
 				message = "docker client error - 3: failed to stop container"
@@ -325,9 +250,9 @@ func remove(c *gin.Context) {
 				break
 			}
 
-			for i, onlineSandboxId := range onlineSandboxIds {
+			for i, onlineSandboxId := range OnlineSandboxIds {
 				if onlineSandboxId == sandboxId {
-					onlineSandboxIds = append(onlineSandboxIds[:i], onlineSandboxIds[i+1:]...)
+					OnlineSandboxIds = append(OnlineSandboxIds[:i], OnlineSandboxIds[i+1:]...)
 				}
 			}
 

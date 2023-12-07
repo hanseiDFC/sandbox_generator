@@ -10,22 +10,27 @@ We would like to clarify that this is an independent project and has no connecti
 
 기존의 nc 명령어 대신 ncat, socat, openssl를 사용하여 ssl 접속을 허용합니다.
 
+## [dome service](https://dklodd.minpeter.tech)
+
+- mathematian-in-wonderland: [dklodd.minpeter.tech/0](https://dklodd.minpeter.tech/0)
+- admin panel: [dklodd.minpeter.tech/admin](https://dklodd.minpeter.tech/admin) (admin:admin)
+
 ### How to use
 
 아직 실험적인 단계이므로, 사용에 주의가 필요합니다.
 
 ```bash
-docker compose -f local-compose.yml up -d
+make dev
 ```
 
 실제로 서비스를 이용하기 위해선 <dklodd.traefik.me:8080>에 접속하여 사용할 수 있습니다.
 
 ---
 
-실제 서비스를 위해선 sidecar-compose.yml과 [minpeter/homelab_infra](https://github.com/minpeter/homelab_infra)의 traefik을 이용하여 외부에서 접속할 수 있도록 설정해야 합니다. 이때 `sidecar-compose.yml`를 사용하여 서비스를 실행하면 됩니다.
+실제 서비스를 위해선 sidecar-compose.yml과 [minpeter/homelab_infra](https://github.com/minpeter/homelab_infra)의 traefik을 이용하여 외부에서 접속할 수 있도록 설정해야 합니다. 이때 `infra-config/sidecar-compose.yml`를 사용하여 서비스를 실행하면 됩니다.
 
 ### shutdown all containers
 
 ```bash
-docker rm -f $(docker ps -qaf "label=dklodd")
+make down
 ```

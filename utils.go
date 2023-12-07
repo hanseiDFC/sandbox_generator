@@ -6,6 +6,7 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -26,6 +27,81 @@ type Challenge struct {
 	Id      string
 	Message string
 	Type    string
+}
+
+var OnlineSandboxIds []string
+
+func GetOnlineSandbox() []Challenge {
+
+	cli, err := client.NewClientWithOpts()
+	if err != nil {
+		panic(err)
+	}
+
+	var resp []Challenge
+	for i, onlineSandboxId := range OnlineSandboxIds {
+		data, err := cli.ContainerInspect(context.Background(), onlineSandboxId)
+		if err != nil {
+			fmt.Println("Failed to inspect container:", err) // 에러 메시지 출력
+			OnlineSandboxIds = append(OnlineSandboxIds[:i], OnlineSandboxIds[i+1:]...)
+			continue
+		}
+
+		resp = append(resp, Challenge{
+			Id:      data.ID[0:12],
+			Name:    data.Config.Image,
+			Message: data.State.Status,
+		})
+
+	}
+
+	return resp
+
+}
+
+func ResetSandbox() {
+	cli, err := client.NewClientWithOpts()
+	if err != nil {
+		panic(err)
+	}
+	ctx := context.Background()
+
+	for _, onlineSandboxId := range OnlineSandboxIds {
+		if err := cli.ContainerStop(ctx, onlineSandboxId, nil); err != nil {
+			fmt.Println("Failed to stop container:", err) // 에러 메시지 출력
+			continue
+		}
+
+		if err := cli.ContainerRemove(ctx, onlineSandboxId, types.ContainerRemoveOptions{
+			RemoveVolumes: true,
+			Force:         true,
+		}); err != nil {
+			fmt.Println("Failed to remove container:", err) // 에러 메시지 출력
+			continue
+		}
+	}
+
+	OnlineSandboxIds = nil
+
+}
+
+func LoadOnlineSandbox() {
+	cli, err := client.NewClientWithOpts()
+	if err != nil {
+		panic(err)
+	}
+	ctx := context.Background()
+
+	containers, err := cli.ContainerList(ctx, types.ContainerListOptions{})
+	if err != nil {
+		panic(err)
+	}
+
+	for _, instance := range containers {
+		if instance.Labels["dklodd"] == "true" {
+			OnlineSandboxIds = append(OnlineSandboxIds, instance.ID[0:12])
+		}
+	}
 }
 
 func PullImage(image string) {
