@@ -84,21 +84,11 @@ func create(c *gin.Context) {
 	host := strings.Split(c.Request.Host, ":")
 
 	if len(host) == 1 {
-		if c.Request.TLS != nil {
+		if c.Request.TLS != nil || c.Request.Header.Get("X-Forwarded-Proto") == "https" || strings.Contains(c.Request.Referer(), "https") {
 			// HTTPS인 경우 443번 포트로 설정
 			host = append(host, "443")
 		} else {
 			// HTTP인 경우 80번 포트로 설정
-			host = append(host, "80")
-		}
-	}
-
-	referer := c.Request.Referer()
-
-	if len(host) == 1 {
-		if strings.Contains(referer, "https") {
-			host = append(host, "443")
-		} else {
 			host = append(host, "80")
 		}
 	}
@@ -171,6 +161,10 @@ func create(c *gin.Context) {
 			"traefik.http.routers." + hashId + ".rule": "Host(`" + hashId + "." + host[0] + "`)",
 			"traefik.http.routers." + hashId + ".tls":  "true",
 			"dklodd": "true",
+		}
+
+		if os.Getenv("CERTRESOLVER") != "" {
+			config.Labels["traefik.http.routers."+hashId+".tls.certresolver"] = os.Getenv("CERTRESOLVER")
 		}
 	}
 

@@ -14,7 +14,7 @@ services:
     networks:
       - traefik
     environment:
-      - PRODUCTION=true
+      - CERTRESOLVER=myresolver
 networks:
   traefik:
     external: true
