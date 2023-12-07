@@ -120,7 +120,7 @@ func PullImage(image string) {
 
 func GenerateId(data *gin.Context) string {
 	hash := sha1.Sum([]byte(data.ClientIP() + data.Request.UserAgent() + time.Now().String()))
-	return strings.ToLower(base64.RawURLEncoding.EncodeToString(hash[:])[:5])
+	return strings.ReplaceAll(strings.ToLower(base64.RawURLEncoding.EncodeToString(hash[:])[:5]), "_", "0")
 }
 
 func GetAllChall() ([]Challenge, error) {

@@ -209,9 +209,30 @@ func create(c *gin.Context) {
 		})
 	} else {
 		c.HTML(http.StatusOK, "tcp.tmpl", gin.H{
-			"Connection": []string{
-				"ncat --ssl " + hashId + "." + host[0] + " " + host[1],
-				"openssl s_client -connect " + hashId + "." + host[0] + ":" + host[1],
+			"Connection": []struct {
+				Type    string
+				Command string
+			}{
+				{
+					Type:    "ncat",
+					Command: "ncat --ssl " + hashId + "." + host[0] + " " + host[1],
+				},
+				{
+					Type:    "openssl",
+					Command: "openssl s_client -connect " + hashId + "." + host[0] + ":" + host[1],
+				},
+				{
+					Type:    "socat",
+					Command: "socat openssl:" + hashId + "." + host[0] + ":" + host[1] + ",verify=0 -",
+				},
+				{
+					Type:    "gnutls",
+					Command: "gnutls-cli --insecure " + hashId + "." + host[0] + ":" + host[1],
+				},
+				{
+					Type:    "pwn",
+					Command: "remote('" + hashId + "." + host[0] + "', " + host[1] + ", ssl=True)",
+				},
 			},
 			"Id": sandboxID[0:12],
 		})
