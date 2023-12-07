@@ -58,6 +58,31 @@
         </div>
       </div>
 
+      <div x-data="{ envCount: 1 }">
+
+        <label class="text-sm mb-2">Environment Variables:</label>
+        <template x-for="i in envCount" :key="i">
+          <div class="flex gap-2 mt-2">
+            <input :id="'envKey' + i" :name="'envKey' + i" type="text" class="rounded bg-gray-700 px-4 py-2"
+              placeholder="Enter Key">
+            <input :id="'envValue' + i" :name="'envValue' + i" type="text" class="rounded bg-gray-700 px-4 py-2"
+              placeholder="Enter Value">
+          </div>
+        </template>
+
+        <div class="flex mt-4 gap-2">
+          <button type="button" @click="envCount > 1 && envCount--"
+            class="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 focus:outline-none focus:shadow-outline-red active:bg-red-800 transition duration-150 ease-in-out">
+            Remove
+          </button>
+          <button type="button" @click="envCount < 5 && envCount++"
+            class="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600 focus:outline-none focus:shadow-outline-green active:bg-green-800 transition duration-150 ease-in-out">
+            Add ENV
+          </button>
+        </div>
+      </div>
+
+
       <button type="submit"
         class="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:shadow-outline-blue active:bg-blue-800 transition duration-150 ease-in-out">Add
         Image</button>

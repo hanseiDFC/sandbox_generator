@@ -153,6 +153,7 @@ func create(c *gin.Context) {
 			"traefik.tcp.routers." + hashId + ".tls":  "true",
 			"dklodd":                                  "true",
 		},
+		Env: chall.Env,
 	}
 
 	if chall.Type == "web" {

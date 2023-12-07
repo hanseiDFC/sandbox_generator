@@ -27,6 +27,7 @@ type Challenge struct {
 	Id      string
 	Message string
 	Type    string
+	Env     []string
 }
 
 var OnlineSandboxIds []string

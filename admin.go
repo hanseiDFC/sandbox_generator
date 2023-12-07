@@ -93,6 +93,18 @@ func createContainerHandler(c *gin.Context) {
 	dockerImage := c.PostForm("dockerImage")
 	imageType := c.PostForm("type")
 
+	env := make([]string, 0)
+	for i := 1; i < 10; i++ {
+		envKey := c.PostForm(fmt.Sprintf("envKey%d", i))
+		envValue := c.PostForm(fmt.Sprintf("envValue%d", i))
+
+		if envKey == "" || envValue == "" {
+			break
+		}
+
+		env = append(env, envKey+"="+envValue)
+	}
+
 	// Validate input (you can add more validation logic)
 	if containerName == "" || dockerImage == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
@@ -103,6 +115,7 @@ func createContainerHandler(c *gin.Context) {
 		Image: dockerImage,
 		Name:  containerName,
 		Type:  imageType,
+		Env:   env,
 	}
 
 	AddChall(newChall)
