@@ -9,8 +9,8 @@
   {{range $index, $connect := .Connection}}
   <div class="mb-6 flex gap-2" x-show="openTab === {{$index}}">
     <code class="bg-black text-white py-2 px-4 rounded border-2">{{$connect.Command}}</code>
-    <button class="bg-black py-2 px-4 rounded border-2"><img src="assets/copy.svg" width="16" height="16"
-        style="filter: invert(100%);" /></button>
+    <button class="bg-black py-2 px-4 rounded border-2 btn" data-clipboard-text="{{$connect.Command}}"><img
+        src="assets/copy.svg" width="16" height="16" style="filter: invert(100%);" /></button>
   </div>
   {{end}}
 </div>
