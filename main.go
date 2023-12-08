@@ -163,10 +163,6 @@ func create(c *gin.Context) {
 			"traefik.http.routers." + hashId + ".tls":  "true",
 			"dklodd": "true",
 		}
-
-		if os.Getenv("CERTRESOLVER") != "" {
-			config.Labels["traefik.http.routers."+hashId+".tls.certresolver"] = os.Getenv("CERTRESOLVER")
-		}
 	}
 
 	hostConfig := &container.HostConfig{

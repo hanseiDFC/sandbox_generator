@@ -8,13 +8,9 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     labels:
       - traefik.enable=true
-      - traefik.http.routers.sandbox-generator.entrypoints=websecure
-      - traefik.http.routers.sandbox-generator.tls.certresolver=myresolver
       - traefik.http.routers.sandbox-generator.rule=Host(`dklodd.minpeter.tech`)
     networks:
       - traefik
-    environment:
-      - CERTRESOLVER=myresolver
 networks:
   traefik:
     external: true
