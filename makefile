@@ -9,8 +9,8 @@ dev:
 
 # 데브 인프라를 완전히 종료
 down:
-		if [ -n "$(docker ps -qaf "label=dklodd")" ]; then \
-			docker rm -f $(docker ps -qaf "label=dklodd"); \
+		if [ -n "$(docker ps -qaf "label=dklodd=true")" ]; then \
+			docker rm -f $(docker ps -qaf "label=dklodd=true"); \
 		else \
 			echo "No containers to remove"; \
 		fi
