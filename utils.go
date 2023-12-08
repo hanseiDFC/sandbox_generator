@@ -105,18 +105,72 @@ func LoadOnlineSandbox() {
 	}
 }
 
-func PullImage(image string) {
+func CRLogin() (string, error) {
+	ctx := context.Background()
 	cli, err := client.NewClientWithOpts()
 	if err != nil {
 		panic(err)
 	}
 
-	out, err := cli.ImagePull(context.Background(), image, types.ImagePullOptions{})
+	authConfig := types.AuthConfig{
+		Username:      os.Getenv("CR_USERNAME"),
+		Password:      os.Getenv("CR_PASSWORD"),
+		ServerAddress: "https://ghcr.io",
+	}
+
+	_, err = cli.RegistryLogin(ctx, authConfig)
+	if err != nil {
+		return "", err
+	}
+
+	encodedJSON, err := json.Marshal(authConfig)
+	if err != nil {
+		return "", err
+	}
+	authStr := base64.URLEncoding.EncodeToString(encodedJSON)
+
+	return authStr, nil
+}
+
+func PullImage(imageName string) {
+	ctx := context.Background()
+	cli, err := client.NewClientWithOpts()
 	if err != nil {
 		panic(err)
 	}
 
-	_, _ = io.Copy(os.Stdout, out)
+	fmt.Println("create sandbox: " + imageName)
+
+	authStr, err := CRLogin()
+	if err != nil {
+		panic(err)
+	}
+
+	_, _, err = cli.ImageInspectWithRaw(ctx, imageName)
+	if err != nil {
+		fmt.Println("pull image: " + imageName)
+		out, err := cli.ImagePull(ctx, imageName, types.ImagePullOptions{
+			RegistryAuth: authStr,
+		})
+		if err != nil {
+			panic(err)
+		}
+
+		// Wait for the image pull to complete
+		var buf bytes.Buffer
+		_, copyErr := io.Copy(&buf, out)
+		if copyErr != nil {
+			panic(copyErr)
+		}
+
+		// Check if there are any errors reported in the output
+		if strings.Contains(buf.String(), "error") {
+			panic("Error while pulling image: " + imageName)
+		}
+
+		// Now the image pull is complete
+		fmt.Println("Image pull complete for: " + imageName)
+	}
 }
 
 func GenerateId(data *gin.Context) string {

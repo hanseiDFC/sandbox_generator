@@ -1,10 +1,8 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"os"
@@ -21,6 +19,14 @@ func main() {
 
 	router := gin.Default()
 	LoadOnlineSandbox()
+
+	if _, err := CRLogin(); err != nil {
+		fmt.Println("CR Login Error: ", err)
+
+		fmt.Println("plz provide your own credentials CR_USERNAME and CR_PASSWORD")
+
+		os.Exit(1)
+	}
 
 	router.LoadHTMLGlob("templates/components/*")
 
@@ -107,43 +113,9 @@ func create(c *gin.Context) {
 	chall := GetChallbyId(challengeID)
 	imageName := chall.Image
 
-	fmt.Println("create sandbox: " + imageName)
-
 	hashId := GenerateId(c)
 
-	_, _, err = cli.ImageInspectWithRaw(ctx, imageName)
-	if err != nil {
-		fmt.Println("pull image: " + imageName)
-		out, err := cli.ImagePull(ctx, imageName, types.ImagePullOptions{})
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"message": "docker client error - fail to pull image",
-			})
-			return
-		}
-
-		// Wait for the image pull to complete
-		var buf bytes.Buffer
-		_, copyErr := io.Copy(&buf, out)
-		if copyErr != nil {
-			// Handle the copy error
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"message": "docker client error - fail to read image pull output",
-			})
-			return
-		}
-
-		// Check if there are any errors reported in the output
-		if strings.Contains(buf.String(), "error") {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"message": "docker client error - error in image pull output",
-			})
-			return
-		}
-
-		// Now the image pull is complete
-		fmt.Println("Image pull complete for: " + imageName)
-	}
+	PullImage(imageName)
 
 	config := &container.Config{
 		Image: imageName,
