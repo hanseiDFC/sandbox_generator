@@ -1,0 +1,63 @@
+{{define "content"}}
+
+
+<!-- Create Container Section -->
+<section class="mb-8">
+  <h2 class="text-xl font-semibold mb-4">Add Image</h2>
+  <form id="createContainerForm" hx-post="image/add" hx-target="#adminContainer" class="space-y-4">
+    <div class="flex flex-col">
+      <label for="containerName" class="text-sm">Container Name:</label>
+      <input type="text" id="containerName" name="containerName" class=" rounded p-2 bg-gray-700" required>
+    </div>
+
+    <div class="flex flex-col">
+      <label for="dockerImage" class="text-sm">Docker Image:</label>
+      <input type="text" id="dockerImage" name="dockerImage" class=" rounded p-2 bg-gray-700" required>
+    </div>
+
+    <div class="flex flex-col">
+      <label for="type" class="text-sm">Type:</label>
+      <div class="flex items-center">
+        <input type="radio" id="tcp" name="type" value="tcp" class="mr-2" checked>
+        <label for="tcp">TCP</label>
+      </div>
+      <div class="flex items-center">
+        <input type="radio" id="web" name="type" value="web" class="mr-2">
+        <label for="web">Web</label>
+      </div>
+    </div>
+
+    <div x-data="{ envCount: 1 }">
+
+      <label class="text-sm mb-2">Environment Variables:</label>
+      <template x-for="i in envCount" :key="i">
+        <div class="flex gap-2 mt-2">
+          <input :id="'envKey' + i" :name="'envKey' + i" type="text" class="rounded bg-gray-700 px-4 py-2"
+            placeholder="Enter Key">
+          <input :id="'envValue' + i" :name="'envValue' + i" type="text" class="rounded bg-gray-700 px-4 py-2"
+            placeholder="Enter Value">
+        </div>
+      </template>
+
+      <div class="flex mt-4 gap-2">
+        <button type="button" @click="envCount > 1 && envCount--"
+          class="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 focus:outline-none focus:shadow-outline-red active:bg-red-800 transition duration-150 ease-in-out">
+          Remove
+        </button>
+        <button type="button" @click="envCount < 5 && envCount++"
+          class="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600 focus:outline-none focus:shadow-outline-green active:bg-green-800 transition duration-150 ease-in-out">
+          Add ENV
+        </button>
+      </div>
+    </div>
+
+
+    <button type="submit"
+      class="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:shadow-outline-blue active:bg-blue-800 transition duration-150 ease-in-out">
+      Confirm
+    </button>
+  </form>
+</section>
+
+
+{{end}}

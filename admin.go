@@ -21,6 +21,11 @@ func adminRouter(admin *gin.RouterGroup) {
 		}, "admin")
 	})
 
+	admin.GET("/add-image", func(c *gin.Context) {
+
+		RenderTemplates(c, gin.H{})
+	})
+
 	admin.POST("/image/add", createContainerHandler)
 
 	admin.POST("/image/del", removeContainerHandler)

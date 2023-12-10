@@ -25,7 +25,7 @@ func main() {
 
 		fmt.Println("plz provide your own credentials CR_USERNAME and CR_PASSWORD")
 
-		os.Exit(1)
+		// os.Exit(1)
 	}
 
 	router.LoadHTMLGlob("templates/components/*")
