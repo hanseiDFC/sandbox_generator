@@ -118,6 +118,10 @@ func CRLogin() (string, error) {
 		ServerAddress: "https://ghcr.io",
 	}
 
+	if os.Getenv("CR_USERNAME") == "" || os.Getenv("CR_PASSWORD") == "" {
+		return "public image maybe?", nil
+	}
+
 	_, err = cli.RegistryLogin(ctx, authConfig)
 	if err != nil {
 		return "", err
@@ -144,6 +148,11 @@ func PullImage(imageName string) {
 	authStr, err := CRLogin()
 	if err != nil {
 		panic(err)
+	}
+
+	if authStr == "public image maybe?" {
+		fmt.Println("public image maybe?")
+		authStr = ""
 	}
 
 	_, _, err = cli.ImageInspectWithRaw(ctx, imageName)
