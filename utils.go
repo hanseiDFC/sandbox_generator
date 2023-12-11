@@ -228,6 +228,43 @@ func AddChall(chall Challenge) {
 	}
 }
 
+func RemoveSandbox(sandboxId string) string {
+	cli, err := client.NewClientWithOpts()
+	if err != nil {
+		panic(err)
+	}
+	ctx := context.Background()
+
+	for _, onlineSandboxId := range OnlineSandboxIds {
+		if onlineSandboxId == sandboxId {
+			if err := cli.ContainerStop(ctx, sandboxId, nil); err != nil {
+				return "docker client error - 3: failed to stop container"
+
+			}
+
+			if err := cli.ContainerRemove(ctx, sandboxId, types.ContainerRemoveOptions{
+				RemoveVolumes: true,
+				Force:         true,
+			}); err != nil {
+				return "docker client error - 4: failed to remove container"
+
+			}
+
+			for i, onlineSandboxId := range OnlineSandboxIds {
+				if onlineSandboxId == sandboxId {
+					OnlineSandboxIds = append(OnlineSandboxIds[:i], OnlineSandboxIds[i+1:]...)
+				}
+			}
+
+			return "successfully removed sandbox"
+
+		}
+
+	}
+
+	return "sandbox not found"
+}
+
 func RemoveChall(challName string) {
 	challenges, err := GetAllChall()
 	if err != nil {

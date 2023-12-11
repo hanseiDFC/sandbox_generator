@@ -15,6 +15,9 @@
   {{end}}
 </div>
 
+<progress class="w-full h-8 bg-blue-500 rounded-full" value="20" max="20" id="progressBar"></progress>
+
+
 <button class="bg-red-500 hover:bg-red-700 text-white text-white font-bold py-2 px-4 rounded" hx-get="/{{.Id}}/del"
   hx-target="#challContainer">Stop</button>
 
@@ -30,4 +33,15 @@
   clipboard.on('error', function (e) {
     alert("복사실패!");
   });
+</script>
+
+<script>
+  var timeleft = 20;
+  var downloadTimer = setInterval(function () {
+    if (timeleft <= 0) {
+      clearInterval(downloadTimer);
+    }
+    document.getElementById("progressBar").value = timeleft;
+    timeleft -= 1;
+  }, 1000);
 </script>

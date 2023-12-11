@@ -15,7 +15,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var tq *TimedQueue
+
 func main() {
+
+	tq = NewTimedQueue(20)
 
 	router := gin.Default()
 	LoadOnlineSandbox()
@@ -164,6 +168,8 @@ func create(c *gin.Context) {
 
 	OnlineSandboxIds = append(OnlineSandboxIds, sandboxID[0:12])
 
+	tq.enqueue(sandboxID[0:12])
+
 	if chall.Type == "web" {
 
 		connection := "https://" + hashId + "." + host[0]
@@ -212,42 +218,7 @@ func remove(c *gin.Context) {
 
 	sandboxId := c.Param("id")
 
-	cli, err := client.NewClientWithOpts()
-	if err != nil {
-		panic(err)
-	}
-	ctx := context.Background()
-	var message string
-
-	for _, onlineSandboxId := range OnlineSandboxIds {
-		if onlineSandboxId == sandboxId {
-			if err := cli.ContainerStop(ctx, sandboxId, nil); err != nil {
-				message = "docker client error - 3: failed to stop container"
-				break
-			}
-
-			if err := cli.ContainerRemove(ctx, sandboxId, types.ContainerRemoveOptions{
-				RemoveVolumes: true,
-				Force:         true,
-			}); err != nil {
-				message = "docker client error - 4: failed to remove container"
-				break
-			}
-
-			for i, onlineSandboxId := range OnlineSandboxIds {
-				if onlineSandboxId == sandboxId {
-					OnlineSandboxIds = append(OnlineSandboxIds[:i], OnlineSandboxIds[i+1:]...)
-				}
-			}
-
-			message = "successfully removed sandbox"
-			break
-		}
-	}
-
-	if message == "" {
-		message = "sandbox not found"
-	}
+	message := RemoveSandbox(sandboxId)
 
 	fmt.Println(message)
 
